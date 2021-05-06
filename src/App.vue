@@ -1,15 +1,16 @@
 <template>
   <div id="app">
-    <div class="content">
-      <div class="flex justify-center mb-12">
+    <div class="w-full flex-col justify-center items-center px-32 py-24">
+      <h1 class="my-4 text-2xl font-bold">Tasks: {{ list.length }}</h1>
+      <div class="flex justify-center mb-6">
         <input
-          class="w-full px-4 py-2 rounded-full"
+          class="w-full px-4 py-2 rounded-lg"
           type="text"
           v-model="task.label"
         />
         <button
           @click="createTask"
-          class="px-4 py-2 text-green-100 bg-green-600 rounded-full ml-2 outline-none"
+          class="px-4 py-2 text-primaryLight bg-green rounded-lg ml-2 outline-none"
         >
           Adicionar
         </button>
@@ -18,8 +19,8 @@
         <ul>
           <li
             v-for="item in list"
-            :key="item.id"
-            class="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-full"
+            :key="item.label"
+            class="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-lg my-4"
           >
             <div class="flex items-center flex-1">
               <input
@@ -28,6 +29,7 @@
                 :id="item.id"
                 :checked="item.done"
                 @change="(e) => (item.done = e.target.checked)"
+                class="border-1 border-gray rounded-sm"
               />
               <p class="ml-4">
                 {{ item.label }}
@@ -35,12 +37,12 @@
             </div>
 
             <button
+              class="w-8 h-8 rounded-lg bg-red-400 flex justify-center items-center hover:bg-white "
               @click="deleteTask(item.id)"
-              class="w-8 h-8 rounded-full bg-red-400 flex justify-center items-center"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-white"
+                class="h-5 w-5 text-white hover:text-red-400"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -55,10 +57,32 @@
         </ul>
       </div>
     </div>
+    <aside class="w-3/5 h-full bg-primaryLight px-32 py-16">
+      <div class="h-1/2 w-full">
+        <h1 class="text-xl font-bold">
+          Tarefas a fazer: {{ incompletedTasks.length }}
+        </h1>
+        <ul>
+          <li v-for="item in incompletedTasks" :key="item.label">
+            {{ item.label }}
+          </li>
+        </ul>
+      </div>
+      <div class="h-1/2 w-full">
+        <h1 class="text-xl font-bold">
+          Tarefas feitas: {{ completedTasks.length }}
+        </h1>
+        <ul>
+          <li v-for="item in completedTasks" :key="item.label">
+            {{ item.label }}
+          </li>
+        </ul>
+      </div>
+    </aside>
   </div>
 </template>
 
-<script>
+<script lang='ts'>
 export default {
   name: "App",
   data() {
@@ -67,19 +91,32 @@ export default {
         label: "",
         done: false,
       },
+      hasError: false,
       list: [],
     };
   },
   methods: {
     createTask() {
-      this.list.push({
-        id: new Date(),
-        label: this.task.label,
-        done: this.task.done,
-      });
+      if (!this.list.find((task) => task.label === this.task.label)) {
+        this.list.push({
+          id: new Date(),
+          label: this.task.label,
+          done: this.task.done,
+        });
+        return (this.hasError = true);
+      }
     },
     deleteTask(id) {
-      this.list = this.list.filter((item) => item.id !== id);
+      console.log({ id });
+      return (this.list = this.list.filter((item) => item.id !== id));
+    },
+  },
+  computed: {
+    completedTasks() {
+      return this.list.filter((task) => task.done);
+    },
+    incompletedTasks() {
+      return this.list.filter((task) => !task.done);
     },
   },
 };
@@ -97,14 +134,8 @@ export default {
   width: 100vw;
   height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 div.content {
-  width: 500px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
 }
 </style>
